@@ -2,3 +2,4 @@
 from .user import User
 from .card import Card
 from .wallet import Wallet
+from .transport import Bus, Route, Stop, RouteStop, BusRoute
