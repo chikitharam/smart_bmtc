@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BMTC Bus Scanner Simulator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styling for the scanner hardware feel */
+        body { background-color: #f3f4f6; }
+        .scanner-box { background: white; border-radius: 1rem; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); }
+        .success-text { color: #16a34a; font-weight: bold; }
+        .error-text { color: #dc2626; font-weight: bold; }
+    </style>
+</head>
+<body class="p-6 flex items-center justify-center min-h-screen">
+
+    <div class="scanner-box w-full max-w-lg p-8">
+        <div class="text-center border-b pb-4 mb-6">
+            <h1 class="text-2xl font-bold text-gray-800">BUS SCANNER SIMULATOR</h1>
+            <p class="text-sm text-gray-500">Smart BMTC System</p>
+        </div>
+
+        <!-- Step 1: Authentication (For Simulator purposes) -->
+        <div class="mb-6 bg-blue-50 p-4 rounded-lg border border-blue-200">
+            <label class="block text-sm font-semibold text-blue-800 mb-1">Admin/Driver Token</label>
+            <input type="password" id="tokenInput" placeholder="Paste your JWT access_token here..." 
+                   class="w-full p-2 border border-blue-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+            <p class="text-xs text-blue-600 mt-1">Get this from /auth/login in Swagger.</p>
+        </div>
+
+        <!-- Step 2: Bus & Route Selection -->
+        <div class="grid grid-cols-2 gap-4 mb-6">
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Bus Number</label>
+                <select id="busSelect" class="w-full p-2 border rounded bg-gray-50">
+                    <option value="1">KA-01-AB-1234</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Route Number</label>
+                <select id="routeSelect" class="w-full p-2 border rounded bg-gray-50">
+                    <option value="1">500D</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Step 3: Current Stop -->
+        <div class="mb-6">
+            <label class="block text-sm font-semibold text-gray-700 mb-1">Current Stop</label>
+            <select id="stopSelect" class="w-full p-2 border rounded bg-gray-50">
+                <option value="1">Majestic</option>
+                <option value="2">Town Hall</option>
+                <option value="3">Lalbagh</option>
+                <option value="4">Silk Board</option>
+                <option value="5">Electronic City</option>
+            </select>
+        </div>
+
+        <!-- Step 4: Card Input -->
+        <div class="mb-6">
+            <label class="block text-sm font-semibold text-gray-700 mb-1">Scan Card Number</label>
+            <input type="text" id="cardInput" placeholder="e.g. BMTC123456" 
+                   class="w-full p-3 border-2 border-gray-300 rounded-lg text-lg font-mono focus:outline-none focus:border-blue-500">
+        </div>
+
+        <!-- Step 5: Actions -->
+        <div class="grid grid-cols-2 gap-4 mb-6">
+            <button onclick="tapIn()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition">
+                TAP IN
+            </button>
+            <button onclick="tapOut()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-lg transition">
+                TAP OUT
+            </button>
+        </div>
+
+        <!-- Step 6: Status Screen -->
+        <div class="bg-gray-900 text-green-400 p-4 rounded-lg font-mono text-sm min-h-[120px]">
+            <p class="mb-2 border-b border-gray-700 pb-1">SYSTEM STATUS:</p>
+            <div id="statusOutput">
+                <p>Waiting for card scan...</p>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const API_BASE = "http://127.0.0.1:8000";
+
+        function getHeaders() {
+            const token = document.getElementById('tokenInput').value.trim();
+            if (!token) {
+                alert("Please paste your JWT token first!");
+                throw new Error("No token");
+            }
+            return {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            };
+        }
+
+        function logStatus(message, isError = false) {
+            const output = document.getElementById('statusOutput');
+            const color = isError ? "text-red-500" : "text-green-400";
+            output.innerHTML = `<p class="${color}">> ${message}</p>`;
+        }
+
+        async function tapIn() {
+            try {
+                const headers = getHeaders();
+                const card_number = document.getElementById('cardInput').value.trim();
+                const bus_id = parseInt(document.getElementById('busSelect').value);
+                const route_id = parseInt(document.getElementById('routeSelect').value);
+                const boarding_stop_id = parseInt(document.getElementById('stopSelect').value);
+
+                if (!card_number) return logStatus("Please enter a card number.", true);
+
+                logStatus("Processing Tap-In...");
+                
+                const response = await fetch(`${API_BASE}/journeys/tap-in`, {
+                    method: 'POST',
+                    headers: headers,
+                    body: JSON.stringify({ card_number, bus_id, route_id, boarding_stop_id })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    logStatus(`SUCCESS: Boarding Recorded at Stop ${boarding_stop_id}. Journey ID: ${data.id}`);
+                    document.getElementById('cardInput').value = ""; // Clear input
+                } else {
+                    logStatus(`FAILED: ${data.detail}`, true);
+                }
+            } catch (error) {
+                logStatus(`ERROR: ${error.message}`, true);
+            }
+        }
+
+        async function tapOut() {
+            try {
+                const headers = getHeaders();
+                const card_number = document.getElementById('cardInput').value.trim();
+                const bus_id = parseInt(document.getElementById('busSelect').value);
+                const destination_stop_id = parseInt(document.getElementById('stopSelect').value);
+
+                if (!card_number) return logStatus("Please enter a card number.", true);
+                if (!destination_stop_id) return logStatus("Please select a destination stop.", true);
+
+                logStatus("Processing Tap-Out...");
+
+                const response = await fetch(`${API_BASE}/journeys/tap-out`, {
+                    method: 'POST',
+                    headers: headers,
+                    body: JSON.stringify({ card_number, bus_id, destination_stop_id })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    logStatus(`SUCCESS: Journey Completed. Fare Deducted: ₹${data.fare}`);
+                    document.getElementById('cardInput').value = ""; // Clear input
+                } else {
+                    logStatus(`FAILED: ${data.detail}`, true);
+                }
+            } catch (error) {
+                logStatus(`ERROR: ${error.message}`, true);
+            }
+        }
+    </script>
+</body>
+</html>

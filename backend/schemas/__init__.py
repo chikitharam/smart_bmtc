@@ -6,3 +6,7 @@ from .transport import (
     RouteCreate, RouteResponse, RouteStopCreate, 
     RouteStopResponse, RouteWithStopsResponse
 )
+#from .journey import TapInRequest, JourneyResponse  # <-- Add this
+from .journey import TapInRequest, TapOutRequest, JourneyResponse  # <-- Add TapOutRequest
+from .wallet import WalletBalanceResponse, RechargeRequest, TransactionResponse
+from .ticket import TicketResponse

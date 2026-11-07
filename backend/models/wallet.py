@@ -10,5 +10,5 @@ class Wallet(Base):
     user_id = Column(Integer, ForeignKey("users.id"), unique=True, nullable=False)
     balance = Column(Numeric(12, 2), default=0.00)
 
-    # Relationship to the User model
     user = relationship("User", back_populates="wallet")
+    transactions = relationship("Transaction", back_populates="wallet") # <-- Add this
