@@ -10,3 +10,6 @@ from .transport import (
 from .journey import TapInRequest, TapOutRequest, JourneyResponse  # <-- Add TapOutRequest
 from .wallet import WalletBalanceResponse, RechargeRequest, TransactionResponse
 from .ticket import TicketResponse
+from .analytics import RouteDemand, StopDemand, HourlyDemand, DayTypeDemand, BusOccupancyResponse
+from .ai import AIPredictRequest, AIPredictResponse
+from .recommendation import ReallocationResponse

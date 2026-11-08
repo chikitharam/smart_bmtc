@@ -1,7 +1,7 @@
 # backend/main.py
 from fastapi import FastAPI
 from database import engine, Base
-from routes import auth, users, cards, transport, journey, wallet, tickets# <-- Add journeys
+from routes import auth, users, cards, transport, journey, wallet, tickets, analytics, ai, recommendations# <-- Add journeys
 from fastapi.staticfiles import StaticFiles # <-- Add this
 from fastapi.responses import FileResponse # <-- Add this
 
@@ -21,6 +21,9 @@ app.include_router(transport.router) # <-- Add this
 app.include_router(journey.router) # <-- Add this
 app.include_router(wallet.router)
 app.include_router(tickets.router) # <-- Add this
+app.include_router(analytics.router) # <-- Add this
+app.include_router(ai.router) # <-- Add this
+app.include_router(recommendations.router) # <-- Add this
 
 # Mount the static folder to serve HTML/CSS/JS
 app.mount("/static", StaticFiles(directory="static"), name="static")
