@@ -13,3 +13,4 @@ from .ticket import TicketResponse
 from .analytics import RouteDemand, StopDemand, HourlyDemand, DayTypeDemand, BusOccupancyResponse
 from .ai import AIPredictRequest, AIPredictResponse
 from .recommendation import ReallocationResponse
+from .safety import SafetyReportCreate, SafetyReportResponse

@@ -11,3 +11,6 @@ class ReallocationResponse(BaseModel):
     recommendation: str
     action_required: str
     suggested_bus_to_move: Optional[str] = None
+    suggested_bus_id: Optional[int] = None  # <-- Added
+    high_route_id: int                      # <-- Added
+    low_route_id: int                       # <-- Added

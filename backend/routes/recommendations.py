@@ -43,6 +43,7 @@ def get_bus_allocation_recommendation(
     recommendation = ""
     action_required = ""
     suggested_bus = None
+    suggested_bus_id = None # <-- Initialize ID
 
     if high_occupancy > 90 and lowest_occupancy < 40:
         recommendation = f"Route {high_route.route_number} is overcrowded ({high_occupancy}%). Route {low_route.route_number} is underutilized ({lowest_occupancy}%)."
@@ -53,6 +54,7 @@ def get_bus_allocation_recommendation(
             bus_to_move = db.query(Bus).join(BusRoute).filter(BusRoute.route_id == low_route.id).first()
             if bus_to_move:
                 suggested_bus = bus_to_move.bus_number
+                suggested_bus_id = bus_to_move.id # <-- Store the actual ID
                 action_required = f"REVIEW: Consider reallocating bus {suggested_bus} from {low_route.route_number} to {high_route.route_number}."
             else:
                 action_required = f"REVIEW: Reallocate one available bus from {low_route.route_number} to {high_route.route_number}."
@@ -71,9 +73,12 @@ def get_bus_allocation_recommendation(
         "status": "success",
         "high_demand_route": high_route.route_number,
         "high_route_occupancy": high_occupancy,
-        "low_demand_route": low_route.route_number, # Returns the auto-detected low route
+        "low_demand_route": low_route.route_number,
         "low_route_occupancy": lowest_occupancy,
         "recommendation": recommendation,
         "action_required": action_required,
-        "suggested_bus_to_move": suggested_bus
+        "suggested_bus_to_move": suggested_bus,
+        "suggested_bus_id": suggested_bus_id, # <-- Return ID
+        "high_route_id": high_route.id,       # <-- Return High Route ID
+        "low_route_id": low_route.id          # <-- Return Low Route ID
     }

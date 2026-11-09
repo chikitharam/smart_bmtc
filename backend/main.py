@@ -1,7 +1,8 @@
 # backend/main.py
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware # <-- Add this
 from database import engine, Base
-from routes import auth, users, cards, transport, journey, wallet, tickets, analytics, ai, recommendations# <-- Add journeys
+from routes import auth, users, cards, transport, journey, wallet, tickets, analytics, ai, recommendations, safety, admin# <-- Add journeys
 from fastapi.staticfiles import StaticFiles # <-- Add this
 from fastapi.responses import FileResponse # <-- Add this
 
@@ -14,6 +15,14 @@ app = FastAPI(
     version="1.0.0"
 )
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"], # React default port
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 app.include_router(auth.router)
 app.include_router(users.router)
 app.include_router(cards.router) # <-- Include cards router
@@ -24,6 +33,9 @@ app.include_router(tickets.router) # <-- Add this
 app.include_router(analytics.router) # <-- Add this
 app.include_router(ai.router) # <-- Add this
 app.include_router(recommendations.router) # <-- Add this
+app.include_router(safety.router)
+app.include_router(admin.router)
+
 
 # Mount the static folder to serve HTML/CSS/JS
 app.mount("/static", StaticFiles(directory="static"), name="static")

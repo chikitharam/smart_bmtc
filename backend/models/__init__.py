@@ -5,3 +5,4 @@ from .wallet import Wallet
 from .transport import Bus, Route, Stop, RouteStop, BusRoute
 from .journey import Journey  # <-- Add this
 from .transaction import Transaction # <-- Add this
+from .safe import SafetyReport  # <-- Add this line
